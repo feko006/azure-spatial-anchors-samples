@@ -4,26 +4,30 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 {
     public class AzureSpatialAnchorsBasicDemoScript : DemoScriptBase
     {
+        public InputField AnchorId;
+        public Button AddAnchorButton;
+
         internal enum AppState
         {
             DemoStepCreateSession = 0,
             DemoStepConfigSession,
             DemoStepStartSession,
-            DemoStepCreateLocalAnchor,
-            DemoStepSaveCloudAnchor,
-            DemoStepSavingCloudAnchor,
-            DemoStepStopSession,
-            DemoStepDestroySession,
-            DemoStepCreateSessionForQuery,
-            DemoStepStartSessionForQuery,
+            //DemoStepCreateLocalAnchor,
+            //DemoStepSaveCloudAnchor,
+            //DemoStepSavingCloudAnchor,
+            //DemoStepStopSession,
+            //DemoStepDestroySession,
+            //DemoStepCreateSessionForQuery,
+            //DemoStepStartSessionForQuery,
             DemoStepLookForAnchor,
             DemoStepLookingForAnchor,
-            DemoStepDeleteFoundAnchor,
+            //DemoStepDeleteFoundAnchor,
             DemoStepStopSessionForQuery,
             DemoStepComplete,
             DemoStepBusy
@@ -34,15 +38,15 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             { AppState.DemoStepCreateSession,new DemoStepParams() { StepMessage = "Next: Create Azure Spatial Anchors Session", StepColor = Color.clear }},
             { AppState.DemoStepConfigSession,new DemoStepParams() { StepMessage = "Next: Configure Azure Spatial Anchors Session", StepColor = Color.clear }},
             { AppState.DemoStepStartSession,new DemoStepParams() { StepMessage = "Next: Start Azure Spatial Anchors Session", StepColor = Color.clear }},
-            { AppState.DemoStepCreateLocalAnchor,new DemoStepParams() { StepMessage = "Tap a surface to add the Local Anchor.", StepColor = Color.blue }},
-            { AppState.DemoStepSaveCloudAnchor,new DemoStepParams() { StepMessage = "Next: Save Local Anchor to cloud", StepColor = Color.yellow }},
-            { AppState.DemoStepSavingCloudAnchor,new DemoStepParams() { StepMessage = "Saving local Anchor to cloud...", StepColor = Color.yellow }},
-            { AppState.DemoStepStopSession,new DemoStepParams() { StepMessage = "Next: Stop Azure Spatial Anchors Session", StepColor = Color.green }},
-            { AppState.DemoStepCreateSessionForQuery,new DemoStepParams() { StepMessage = "Next: Create Azure Spatial Anchors Session for query", StepColor = Color.clear }},
-            { AppState.DemoStepStartSessionForQuery,new DemoStepParams() { StepMessage = "Next: Start Azure Spatial Anchors Session for query", StepColor = Color.clear }},
+            //{ AppState.DemoStepCreateLocalAnchor,new DemoStepParams() { StepMessage = "Tap a surface to add the Local Anchor.", StepColor = Color.blue }},
+            //{ AppState.DemoStepSaveCloudAnchor,new DemoStepParams() { StepMessage = "Next: Save Local Anchor to cloud", StepColor = Color.yellow }},
+            //{ AppState.DemoStepSavingCloudAnchor,new DemoStepParams() { StepMessage = "Saving local Anchor to cloud...", StepColor = Color.yellow }},
+            //{ AppState.DemoStepStopSession,new DemoStepParams() { StepMessage = "Next: Stop Azure Spatial Anchors Session", StepColor = Color.green }},
+            //{ AppState.DemoStepCreateSessionForQuery,new DemoStepParams() { StepMessage = "Next: Create Azure Spatial Anchors Session for query", StepColor = Color.clear }},
+            //{ AppState.DemoStepStartSessionForQuery,new DemoStepParams() { StepMessage = "Next: Start Azure Spatial Anchors Session for query", StepColor = Color.clear }},
             { AppState.DemoStepLookForAnchor,new DemoStepParams() { StepMessage = "Next: Look for Anchor", StepColor = Color.clear }},
             { AppState.DemoStepLookingForAnchor,new DemoStepParams() { StepMessage = "Looking for Anchor...", StepColor = Color.clear }},
-            { AppState.DemoStepDeleteFoundAnchor,new DemoStepParams() { StepMessage = "Next: Delete Anchor", StepColor = Color.yellow }},
+            //{ AppState.DemoStepDeleteFoundAnchor,new DemoStepParams() { StepMessage = "Next: Delete Anchor", StepColor = Color.yellow }},
             { AppState.DemoStepStopSessionForQuery,new DemoStepParams() { StepMessage = "Next: Stop Azure Spatial Anchors Session for query", StepColor = Color.grey }},
             { AppState.DemoStepComplete,new DemoStepParams() { StepMessage = "Next: Restart demo", StepColor = Color.clear }},
             { AppState.DemoStepBusy,new DemoStepParams() { StepMessage = "Processing...", StepColor = Color.clear }}
@@ -83,6 +87,8 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         /// </summary>
         public override void Start()
         {
+            AddAnchorButton.onClick.AddListener(OnAddAnchorButtonClicked);
+
             Debug.Log(">>Azure Spatial Anchors Demo Script Start");
 
             base.Start();
@@ -94,6 +100,12 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             feedbackBox.text = stateParams[currentAppState].StepMessage;
 
             Debug.Log("Azure Spatial Anchors Demo script started");
+        }
+
+        private void OnAddAnchorButtonClicked()
+        {
+            anchorIdsToLocate.Add(AnchorId.text);
+            AnchorId.text = string.Empty;
         }
 
         protected override void OnCloudAnchorLocated(AnchorLocatedEventArgs args)
@@ -111,7 +123,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                     anchorPose = currentCloudAnchor.GetPose();
 
                     SpawnOrMoveCurrentAnchoredObject(anchorPose.position, anchorPose.rotation);
-                    currentAppState = AppState.DemoStepDeleteFoundAnchor;
+                    currentAppState = AppState.DemoStepStopSessionForQuery;
                 });
             }
         }
@@ -138,7 +150,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
         protected override bool IsPlacingObject()
         {
-            return currentAppState == AppState.DemoStepCreateLocalAnchor;
+            return currentAppState == AppState.DemoStepBusy;
         }
 
         protected override Color GetStepColor()
@@ -159,7 +171,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
             SpawnOrMoveCurrentAnchoredObject(anchorPose.position, anchorPose.rotation);
 
-            currentAppState = AppState.DemoStepStopSession;
+            currentAppState = AppState.DemoStepBusy;
         }
 
         protected override void OnSaveCloudAnchorFailed(Exception exception)
@@ -191,41 +203,42 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                 case AppState.DemoStepStartSession:
                     currentAppState = AppState.DemoStepBusy;
                     await CloudManager.StartSessionAsync();
-                    currentAppState = AppState.DemoStepCreateLocalAnchor;
-                    break;
-                case AppState.DemoStepCreateLocalAnchor:
-                    currentAppState = AppState.DemoStepBusy;
-                    if (spawnedObject != null)
-                    {
-                        currentAppState = AppState.DemoStepSaveCloudAnchor;
-                    }
-                    else
-                    {
-                        currentAppState = AppState.DemoStepCreateLocalAnchor;
-                    }
-                    break;
-                case AppState.DemoStepSaveCloudAnchor:
-                    currentAppState = AppState.DemoStepSavingCloudAnchor;
-                    await SaveCurrentObjectAnchorToCloudAsync();
-                    break;
-                case AppState.DemoStepStopSession:
-                    currentAppState = AppState.DemoStepBusy;
-                    CloudManager.StopSession();
-                    CleanupSpawnedObjects();
-                    await CloudManager.ResetSessionAsync();
-                    currentAppState = AppState.DemoStepCreateSessionForQuery;
-                    break;
-                case AppState.DemoStepCreateSessionForQuery:
-                    ConfigureSession();
-                    currentAppState = AppState.DemoStepStartSessionForQuery;
-                    break;
-                case AppState.DemoStepStartSessionForQuery:
-                    currentAppState = AppState.DemoStepBusy;
-                    await CloudManager.StartSessionAsync();
                     currentAppState = AppState.DemoStepLookForAnchor;
                     break;
+                //case AppState.DemoStepCreateLocalAnchor:
+                //    currentAppState = AppState.DemoStepBusy;
+                //    if (spawnedObject != null)
+                //    {
+                //        currentAppState = AppState.DemoStepSaveCloudAnchor;
+                //    }
+                //    else
+                //    {
+                //        currentAppState = AppState.DemoStepCreateLocalAnchor;
+                //    }
+                //    break;
+                //case AppState.DemoStepSaveCloudAnchor:
+                //    currentAppState = AppState.DemoStepSavingCloudAnchor;
+                //    await SaveCurrentObjectAnchorToCloudAsync();
+                //    break;
+                //case AppState.DemoStepStopSession:
+                //    currentAppState = AppState.DemoStepBusy;
+                //    CloudManager.StopSession();
+                //    CleanupSpawnedObjects();
+                //    await CloudManager.ResetSessionAsync();
+                //    currentAppState = AppState.DemoStepCreateSessionForQuery;
+                //    break;
+                //case AppState.DemoStepCreateSessionForQuery:
+                //    ConfigureSession();
+                //    currentAppState = AppState.DemoStepStartSessionForQuery;
+                //    break;
+                //case AppState.DemoStepStartSessionForQuery:
+                //    currentAppState = AppState.DemoStepBusy;
+                //    await CloudManager.StartSessionAsync();
+                //    currentAppState = AppState.DemoStepLookForAnchor;
+                //    break;
                 case AppState.DemoStepLookForAnchor:
                     currentAppState = AppState.DemoStepLookingForAnchor;
+                    anchorLocateCriteria.Identifiers = anchorIdsToLocate.ToArray();
                     if (currentWatcher != null)
                     {
                         currentWatcher.Stop();
@@ -241,12 +254,12 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                     break;
                 case AppState.DemoStepLookingForAnchor:
                     break;
-                case AppState.DemoStepDeleteFoundAnchor:
-                    currentAppState = AppState.DemoStepBusy;
-                    await CloudManager.DeleteAnchorAsync(currentCloudAnchor);
-                    CleanupSpawnedObjects();
-                    currentAppState = AppState.DemoStepStopSessionForQuery;
-                    break;
+                //case AppState.DemoStepDeleteFoundAnchor:
+                //    currentAppState = AppState.DemoStepBusy;
+                //    await CloudManager.DeleteAnchorAsync(currentCloudAnchor);
+                //    CleanupSpawnedObjects();
+                //    currentAppState = AppState.DemoStepStopSessionForQuery;
+                //    break;
                 case AppState.DemoStepStopSessionForQuery:
                     currentAppState = AppState.DemoStepBusy;
                     CloudManager.StopSession();
@@ -270,10 +283,10 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         private void ConfigureSession()
         {
             List<string> anchorsToFind = new List<string>();
-            if (currentAppState == AppState.DemoStepCreateSessionForQuery)
-            {
-                anchorsToFind.Add(currentAnchorId);
-            }
+            //if (currentAppState == AppState.DemoStepCreateSessionForQuery)
+            //{
+            //    anchorsToFind.Add(currentAnchorId);
+            //}
 
             SetAnchorIdsToLocate(anchorsToFind);
         }
